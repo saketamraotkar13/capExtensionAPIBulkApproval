@@ -1,0 +1,55 @@
+using { strbw as mydb } from '../db/data-model';
+
+service MyOrderApprovalService {
+
+    @odata.draft.bypass
+    @odata.draft.enabled
+    entity Orders as projection on mydb.Orders
+   
+
+    entity reasonCodeVH as projection on mydb.reasonCodeVH;
+
+    // 🔹 Custom mass update action
+  // 🔹 Define a collection-level action
+   // 🔹 Mass Approve/Reject with popup input
+  action approveOrders(
+        orders: array of String,
+      approveLoad : Boolean,
+      reasonCode  : String
+  ) returns Boolean;
+
+entity ProductVH as projection on mydb.Orders { 
+    key product: String
+}
+group by product;
+entity MOT2VH as projection on mydb.Orders { 
+    key mot2: String
+}
+group by mot2;
+
+entity MOTVH as projection on mydb.Orders { 
+    key mot: String
+}
+group by mot;
+
+entity sourceLocationVH as projection on mydb.Orders { 
+    key sourceLocation: String
+}
+group by sourceLocation;
+
+entity destinationLocationVH as projection on mydb.Orders { 
+    key destinationLocation: String
+}
+group by destinationLocation;
+
+entity categoryVH as projection on mydb.Orders { 
+    key category: String
+}
+group by category;
+
+entity OrdersVH as projection on mydb.Orders { 
+    key orderNumber: String
+}
+group by category;
+
+}

@@ -1,0 +1,27 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <Dialog
+      id="idApprovalDialog"
+      title="Bulk Approval"
+      class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer">
+
+    <content>
+      <VBox id="idVbox" class="sapUiSmallMargin">
+        <Label id="idlbl1" text="Approve Load?" />
+        <!-- <Switch id="approveSwitch" state="true" textOn="Approve" textOff="Reject" /> -->
+
+        <Label id="idlbl2" text="Reason Code" class="sapUiSmallMarginTop" />
+        <Input id="reasonInput" placeholder="Enter reason..." width="100%" />
+        <Button id="idbt1" text="MyButton" press="onBtn"></Button>
+      </VBox>
+    </content>
+
+    <beginButton>
+      <Button id="idB1" text="Submit" type="Emphasized" press="onApproveDialogConfirm"/>
+    </beginButton>
+
+    <endButton>
+      <Button id="idB2" text="Cancel" press="onApproveDialogCancel"/>
+    </endButton>
+
+  </Dialog>
+</core:FragmentDefinition>
