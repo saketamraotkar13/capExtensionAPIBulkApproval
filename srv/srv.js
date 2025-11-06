@@ -4,34 +4,89 @@ class MyOrderApprovalService extends cds.ApplicationService {
   async init() {
     await super.init();
 
+    //Handling Mass Upload using filters passed from UI-----halding filters
     this.on('approveOrders', async (req) => {
-      const { orders, approveLoad, reasonCode } = req.data;
+      let { orders, approveLoad, reasonCode, filters } = req.data;
 
-      if (!orders?.length) return req.error(400, 'Please provide at least one order.');
-      if (approveLoad === false && (!reasonCode || reasonCode.trim() === ''))
-        return req.error(400, 'Reason Code is mandatory when Approve Load is No.');
-      if(approveLoad && reasonCode){
+      // If filters provided (Approve All Filtered Orders)
+      if (filters) {
+        filters = JSON.parse(filters); // parse JSON from UI
 
-      
+        // Build WHERE conditions based on business filter values
+        const whereConditions = {};
+        if (filters.category) whereConditions.category = filters.category;
+        if (filters.status) whereConditions.status = filters.status;
+        if (filters.sourceLocation) whereConditions.sourceLocation = filters.sourceLocation;
+        if (filters.destinationLocation) whereConditions.destinationLocation = filters.destinationLocation;
+        if (filters.dateFrom && filters.dateTo) {
+          whereConditions.orderDate = { ">=": filters.dateFrom, "<=": filters.dateTo };
+        }
+
+        // Select matching order numbers from DB
+        const rows = await SELECT.from('strbw.Orders')
+          .where(whereConditions)
+          .columns(['orderNumber']);
+
+        orders = rows.map(r => r.orderNumber);
+      }
+
+      if (!orders || orders.length === 0) return req.error(400, 'No orders to update.');
+
+      // Update orders in DB
+      if(reasonCode){    
       await UPDATE('strbw.Orders')
         .set({ approveLoad, reasonCode })
         .where({ orderNumber: { in: orders } });
       }
       else {
-        
-      
-      await UPDATE('strbw.Orders')
+        await UPDATE('strbw.Orders')
         .set({ approveLoad })
         .where({ orderNumber: { in: orders } });
       }
-      console.log(`✅ Updated ${orders.length} orders`);
 
-      return {
-        success: true,
-        message: `${orders.length} orders updated successfully.`,
-      };
+      return { success: true, message: `${orders.length} orders updated successfully.` };
     });
   }
 }
 
 module.exports = MyOrderApprovalService;
+
+//----handling by passing Array of key values (orderNumber)
+
+// const cds = require('@sap/cds');
+
+// class MyOrderApprovalService extends cds.ApplicationService {
+//   async init() {
+//     await super.init();
+
+//     this.on('approveOrders', async (req) => {
+//       const { orders, approveLoad, reasonCode } = req.data;
+
+//       if (!orders?.length) return req.error(400, 'Please provide at least one order.');
+//       if (approveLoad === false && (!reasonCode || reasonCode.trim() === ''))
+//         return req.error(400, 'Reason Code is mandatory when Approve Load is No.');
+//       if(approveLoad && reasonCode){
+
+      
+//       await UPDATE('strbw.Orders')
+//         .set({ approveLoad, reasonCode })
+//         .where({ orderNumber: { in: orders } });
+//       }
+//       else {
+        
+      
+//       await UPDATE('strbw.Orders')
+//         .set({ approveLoad })
+//         .where({ orderNumber: { in: orders } });
+//       }
+//       console.log(`✅ Updated ${orders.length} orders`);
+
+//       return {
+//         success: true,
+//         message: `${orders.length} orders updated successfully.`,
+//       };
+//     });
+//   }
+// }
+
+// module.exports = MyOrderApprovalService;

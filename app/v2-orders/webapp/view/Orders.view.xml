@@ -1,0 +1,48 @@
+<mvc:View
+    controllerName="v2orders.controller.Orders"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    height="100%">
+
+    <Page id="page" title="Orders">
+        <VBox class="sapUiSmallMargin">         
+            <!-- SmartFilterBar -->
+            <smartFilterBar:SmartFilterBar
+                id="smartFilterBar"
+                entitySet="Orders"
+                enableBasicSearch="true"
+                liveMode="false">
+            </smartFilterBar:SmartFilterBar>
+            <!-- SmartTable -->
+            <smartTable:SmartTable
+                id="smartTable"
+                entitySet="Orders"
+                tableType="Table"
+                smartFilterId="smartFilterBar"
+                enableAutoBinding="true"
+                enableExport="true"
+                useVariantManagement="true"
+                header="Orders"
+                width="100%"
+                height="600px"                
+                showRowCount="true">
+                <smartTable:customToolbar id="idCT">
+                        <OverflowToolbar id="idOTB">
+                            <Title id="idTxt" text="Orders" level="H3" />
+                            <ToolbarSpacer id="idTBS"/>
+                            <!-- Approve Selected Button -->
+                            <Button
+                                id="approveSelectedBtn"
+                                text="Mass Approve"
+                                icon="sap-icon://verified"
+                                type="Emphasized"
+                                press=".onApproveSelected" />
+                        </OverflowToolbar>
+                    </smartTable:customToolbar>
+            </smartTable:SmartTable>
+
+        </VBox>
+    </Page>
+</mvc:View>

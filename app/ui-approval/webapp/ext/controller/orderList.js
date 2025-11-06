@@ -12,7 +12,7 @@ sap.ui.define([
         /**
          * Open dialog
          */
-onBulkApproval: function (oContext, aSelectedContexts) {
+onBulkApproval: async function (oContext, aSelectedContexts) {
     if (!aSelectedContexts || aSelectedContexts.length === 0) {
         sap.m.MessageBox.warning("Please select at least one order.");
         return;
@@ -25,7 +25,7 @@ onBulkApproval: function (oContext, aSelectedContexts) {
     var oReasonCombo = new sap.m.ComboBox({
         width: "100%",
         placeholder: "Select Reason Code...",
-        enabled: true, // always open
+        enabled: true,
         items: {
             path: "/reasonCodeVH",
             template: new sap.ui.core.ListItem({
@@ -35,16 +35,16 @@ onBulkApproval: function (oContext, aSelectedContexts) {
         }
     });
 
-    // Approve Load Checkbox
+    // Approve Checkbox
     var oApproveCheckbox = new sap.m.CheckBox({
         text: "Approve Load",
+        width: "90%",
         selected: true
-        // No select event needed for enabling/disabling dropdown
     });
 
-    // VBox layout for spacing
+    // VBox layout
     var oVBox = new sap.m.VBox({
-        width: "100%",
+        width: "90%",
         items: [
             oApproveCheckbox,
             new sap.m.Label({ text: "Reason Code", design: "Bold" }),
@@ -53,7 +53,7 @@ onBulkApproval: function (oContext, aSelectedContexts) {
         class: "sapUiSmallMargin sapUiMediumPadding"
     });
 
-    // Dialog Definition
+    // Dialog
     var oDialog = new sap.m.Dialog({
         title: "Bulk Approval",
         contentWidth: "400px",
@@ -73,19 +73,31 @@ onBulkApproval: function (oContext, aSelectedContexts) {
                 }
 
                 try {
-                    var oAction = oModel.bindContext("/approveOrders(...)");
-                    oAction.setParameter("orders", aOrders);
-                    oAction.setParameter("approveLoad", bApproveLoad);
-
-                    // Only pass reasonCode if selected
-                    if (sReasonCode) {
-                        oAction.setParameter("reasonCode", sReasonCode);
+                    // 🔹 Split orders into chunks (e.g., 200 per batch)
+                    function chunkArray(array, size) {
+                        const result = [];
+                        for (let i = 0; i < array.length; i += size) {
+                            result.push(array.slice(i, i + size));
+                        }
+                        return result;
                     }
 
-                    await oAction.execute();
+                    const chunkedOrders = chunkArray(aOrders, 200);
+
+                    // 🔹 Process each chunk sequentially
+                    for (const ordersChunk of chunkedOrders) {
+                        var oAction = oModel.bindContext("/approveOrders(...)");
+                        oAction.setParameter("orders", ordersChunk);
+                        oAction.setParameter("approveLoad", bApproveLoad);
+                        if (sReasonCode) {
+                            oAction.setParameter("reasonCode", sReasonCode);
+                        }
+                        await oAction.execute();
+                    }
 
                     sap.m.MessageToast.show("Orders processed successfully.");
                     oModel.refresh();
+
                 } catch (oError) {
                     console.error("Bulk approval failed:", oError);
                     sap.m.MessageBox.error("Bulk approval failed: " + (oError.message || "Unknown error"));
@@ -105,14 +117,12 @@ onBulkApproval: function (oContext, aSelectedContexts) {
         }
     });
 
-    // Attach the model for ComboBox binding
+    // Attach model
     oDialog.setModel(oModel);
-
-    // Add compact Fiori styling
     oDialog.addStyleClass("sapUiContentPadding sapUiSizeCompact");
-
     oDialog.open();
 }
+
 
 
 

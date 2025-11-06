@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "A simple CAP project.",
   "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.15.5",
     "@sap/cds": "^9",
-    "express": "^4"
+    "express": "^4",
+    "i": "^0.3.7",
+    "npm": "^11.6.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
@@ -13,7 +16,8 @@
   "scripts": {
     "start": "cds-serve",
     "watch-ui-orders": "cds watch --open uiorders/index.html?sap-ui-xx-viewCache=false --livereload false",
-    "watch-ui-approval": "cds watch --open uiapproval/index.html?sap-ui-xx-viewCache=false --livereload false"
+    "watch-ui-approval": "cds watch --open uiapproval/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-v2-orders": "cds watch --open v2orders/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "private": true,
   "workspaces": [

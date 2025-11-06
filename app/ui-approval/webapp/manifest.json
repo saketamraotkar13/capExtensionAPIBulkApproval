@@ -113,8 +113,8 @@
               "controlConfiguration": {
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
-                    "type": "ResponsiveTable",
-                    "selectionLimit": 2000
+                    "type": "GridTable",
+                    "selectionLimit": 10000
                   },
                   "actions": {
                     "orderList": {

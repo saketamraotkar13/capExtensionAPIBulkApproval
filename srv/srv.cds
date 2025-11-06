@@ -12,12 +12,13 @@ service MyOrderApprovalService {
     // 🔹 Custom mass update action
   // 🔹 Define a collection-level action
    // 🔹 Mass Approve/Reject with popup input
-  action approveOrders(
+   // Collection-level action for mass approval/rejection
+    action approveOrders(
         orders: array of String,
-      approveLoad : Boolean,
-      reasonCode  : String
-  ) returns Boolean;
-
+        approveLoad: Boolean,
+        reasonCode: String,
+        filters: String  
+    ) returns String;
 entity ProductVH as projection on mydb.Orders { 
     key product: String
 }
@@ -53,3 +54,8 @@ entity OrdersVH as projection on mydb.Orders {
 group by orderNumber;
 
 }
+
+        
+annotate MyOrderApprovalService.Orders with @Capabilities.DeleteRestrictions: { Deletable: false };
+annotate MyOrderApprovalService.Orders with @Capabilities.InsertRestrictions: { Insertable: false };
+ 

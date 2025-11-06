@@ -223,6 +223,7 @@ annotate service.Orders with {
             Label : 'OrderNo',
         },
         Common.ValueListWithFixedValues : false,
+        Common.FieldControl : #ReadOnly,
 )};
 
 annotate service.Orders with {
