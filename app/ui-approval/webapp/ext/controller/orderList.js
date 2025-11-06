@@ -12,70 +12,109 @@ sap.ui.define([
         /**
          * Open dialog
          */
-onBulkApproval: function(oContext, aSelectedContexts) {
+onBulkApproval: function (oContext, aSelectedContexts) {
     if (!aSelectedContexts || aSelectedContexts.length === 0) {
-        MessageBox.warning("Please select at least one order.");
+        sap.m.MessageBox.warning("Please select at least one order.");
         return;
     }
 
-    // Extract order numbers
     var aOrders = aSelectedContexts.map(ctx => ctx.getObject().orderNumber);
+    var oModel = aSelectedContexts[0].getModel();
 
-    // Create input controls for MessageBox
-    var oReasonInput = new sap.m.Input({ placeholder: "Enter reason..." });
-    var oApproveSwitch = new sap.m.Switch({
-        state: true,
-        textOn: "Approve",
-        textOff: "Reject"
+    // Reason Code ComboBox (always enabled)
+    var oReasonCombo = new sap.m.ComboBox({
+        width: "100%",
+        placeholder: "Select Reason Code...",
+        enabled: true, // always open
+        items: {
+            path: "/reasonCodeVH",
+            template: new sap.ui.core.ListItem({
+                key: "{reasonCode}",
+                text: "{reasonCode} - {description}"
+            })
+        }
     });
 
+    // Approve Load Checkbox
+    var oApproveCheckbox = new sap.m.CheckBox({
+        text: "Approve Load",
+        selected: true
+        // No select event needed for enabling/disabling dropdown
+    });
+
+    // VBox layout for spacing
     var oVBox = new sap.m.VBox({
+        width: "100%",
         items: [
-            new sap.m.Label({ text: "Approve Load?" }),
-            oApproveSwitch,
-            new sap.m.Label({ text: "Reason Code" }),
-            oReasonInput
+            oApproveCheckbox,
+            new sap.m.Label({ text: "Reason Code", design: "Bold" }),
+            oReasonCombo
         ],
-        class: "sapUiSmallMargin"
+        class: "sapUiSmallMargin sapUiMediumPadding"
     });
 
-    // Show MessageBox
-    MessageBox.show(oVBox, {
-        icon: MessageBox.Icon.INFORMATION,
+    // Dialog Definition
+    var oDialog = new sap.m.Dialog({
         title: "Bulk Approval",
-        actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-        onClose: function(oAction) {
-            if (oAction === MessageBox.Action.OK) {
-                var bApproveLoad = oApproveSwitch.getState();
-                var sReasonCode = oReasonInput.getValue();
+        contentWidth: "400px",
+        type: "Message",
+        content: [oVBox],
+        beginButton: new sap.m.Button({
+            text: "Confirm",
+            type: "Emphasized",
+            press: async function () {
+                var bApproveLoad = oApproveCheckbox.getSelected();
+                var sReasonCode = oReasonCombo.getSelectedKey();
 
-                // Condition: Reason code is mandatory only if ApproveLoad is false (rejected)
+                // Validation: Reason required only when rejecting
                 if (!bApproveLoad && !sReasonCode) {
-                    MessageBox.warning("Reason Code is required when rejecting the order.");
+                    sap.m.MessageBox.warning("Reason Code is required when rejecting the order.");
                     return;
                 }
 
-                // CAP action call using bindContext
-                var oModel = aSelectedContexts[0].getModel();
-                var oAction = oModel.bindContext("/approveOrders(...)");
+                try {
+                    var oAction = oModel.bindContext("/approveOrders(...)");
+                    oAction.setParameter("orders", aOrders);
+                    oAction.setParameter("approveLoad", bApproveLoad);
 
-                oAction.setParameter("orders", aOrders);
-                oAction.setParameter("approveLoad", bApproveLoad);
-                oAction.setParameter("reasonCode", sReasonCode);
+                    // Only pass reasonCode if selected
+                    if (sReasonCode) {
+                        oAction.setParameter("reasonCode", sReasonCode);
+                    }
 
-                oAction.execute().then(function(oResponse) {
-                    var oResult = oAction.getBoundContext().getObject();
-                    console.log("Response:", oResult);
-                    MessageToast.show("Orders approved successfully!");
+                    await oAction.execute();
+
+                    sap.m.MessageToast.show("Orders processed successfully.");
                     oModel.refresh();
-                }).catch(function(oError) {
-                    console.error("Action failed:", oError);
-                    MessageBox.error("Bulk approval failed: " + oError.message);
-                });
+                } catch (oError) {
+                    console.error("Bulk approval failed:", oError);
+                    sap.m.MessageBox.error("Bulk approval failed: " + (oError.message || "Unknown error"));
+                } finally {
+                    oDialog.close();
+                }
             }
-        }.bind(this)
+        }),
+        endButton: new sap.m.Button({
+            text: "Cancel",
+            press: function () {
+                oDialog.close();
+            }
+        }),
+        afterClose: function () {
+            oDialog.destroy();
+        }
     });
+
+    // Attach the model for ComboBox binding
+    oDialog.setModel(oModel);
+
+    // Add compact Fiori styling
+    oDialog.addStyleClass("sapUiContentPadding sapUiSizeCompact");
+
+    oDialog.open();
 }
+
+
 
 
     };

@@ -50,6 +50,6 @@ group by category;
 entity OrdersVH as projection on mydb.Orders { 
     key orderNumber: String
 }
-group by category;
+group by orderNumber;
 
 }

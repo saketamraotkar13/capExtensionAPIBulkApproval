@@ -96,10 +96,6 @@ annotate service.Orders with @(
         },
         {
             $Type : 'UI.DataField',
-            Value : itemNumber,
-        },
-        {
-            $Type : 'UI.DataField',
             Value : product,
         },
         {
@@ -110,6 +106,10 @@ annotate service.Orders with @(
             $Type : 'UI.DataField',
             Value : approveLoad,
         },
+        {
+            $Type : 'UI.DataField',
+            Value : itemNumber,
+        }
     ],
     UI.SelectionFields : [
         category,
