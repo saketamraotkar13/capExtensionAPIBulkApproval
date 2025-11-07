@@ -4,7 +4,7 @@ service MyOrderApprovalService {
 
     @odata.draft.bypass
     @odata.draft.enabled
-    entity Orders as projection on mydb.Orders
+    entity Orders as projection on mydb.Orders;
    
 
     entity reasonCodeVH as projection on mydb.reasonCodeVH;
